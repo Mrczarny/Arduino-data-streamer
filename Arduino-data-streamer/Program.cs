@@ -2,8 +2,12 @@ using System.IO.Ports;
 
 using System;
 using Arduino_data_streamer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseUrls("https://0.0.0.0:7207/", "http://0.0.0.0:5299/");
 
 
 // Add services to the container.
@@ -18,7 +22,7 @@ builder.Services.AddCors(opt =>
         policy.AllowAnyHeader();
     });
 });
-builder.Services.AddHostedService<SerialSender>();
+//builder.Services.AddHostedService<SerialSender>();
 
 var app = builder.Build();
 
@@ -30,31 +34,35 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 
 
-var summaries = new[]
+
+app.MapGet("/hello", () =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    return "Hello, worrld!";
 });
+
+app.MapPost("/data", async (object data,IHubContext<DataHub> _hubContext)  =>
+{
+    var dataModel = new DataModel();
+    if (data == null) return Results.BadRequest();
+    try
+    {
+        dataModel = JsonSerializer.Deserialize<DataModel>(data.ToString());
+        if (dataModel == null) return Results.BadRequest();
+    }
+    catch (System.Exception)
+    {
+        return Results.BadRequest();
+    }
+    await _hubContext.Clients.All.SendAsync("newData", data);
+    return Results.Ok();
+}); 
+
 
 app.MapHub<DataHub>("/signalr");
 
 app.Run();
 
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+// internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+// {
+//     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+// }

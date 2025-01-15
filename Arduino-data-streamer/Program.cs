@@ -49,7 +49,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
-app.UseCors("localhost");
+app.UseCors();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 

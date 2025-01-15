@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
-//builder.WebHost.UseUrls("https://0.0.0.0:7207/", "http://0.0.0.0:5299/");
+ builder.WebHost.UseUrls("https://localhost:8081/", "http://localhost:8080/");
 
 
 
@@ -48,8 +48,8 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-app.UseHttpsRedirection();
-app.UseCors();
+//app.UseHttpsRedirection();
+app.UseCors("localhost");
 app.UseDefaultFiles();
 app.UseStaticFiles();
 

@@ -1,7 +1,10 @@
-﻿namespace Arduino_data_streamer
+﻿
+
+namespace Arduino_data_streamer
 {
     public class DataModel
     {
+        public string Id { get; set; }
         public string BotId { get; set; }
         public int SensorFrontDistance { get; set; }
         public int SensorLeftDistance { get; set;}

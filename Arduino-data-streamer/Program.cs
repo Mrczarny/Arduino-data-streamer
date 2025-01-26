@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
- builder.WebHost.UseUrls("https://localhost:8081/", "http://localhost:8080/");
+// builder.WebHost.UseUrls("https://localhost:8081/", "http://localhost:8080/");
 
 
 
@@ -35,7 +35,7 @@ builder.Services.AddCors(options =>
     {
         builder
             .WithOrigins(
-                "http://localhost")
+                "http://localhost", "https://test-c12f6.web.app")
             .AllowCredentials()
             .AllowAnyHeader()
             .SetIsOriginAllowed(_ => true)
@@ -49,11 +49,19 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 
 //app.UseHttpsRedirection();
-app.UseCors("localhost");
+app.UseCors();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-var API = "ppp";
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<DataContext>();
+    context.Database.EnsureCreated();
+    //context.Database.Migrate();
+}
+
+var API = "test";
 
 app.MapGet("/hello", () =>
 {
